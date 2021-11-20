@@ -1,0 +1,65 @@
+<html>
+	<head>
+		<title>Main</title>
+		<script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
+	</head>
+	<body>
+		<button id=add>Добавить</button>
+		<button id=push>Присоединиться</button>
+		<input type=text id=input />
+		<p id=text></p>
+		<video id=video autoplay></video>
+		<script>
+			let add=document.getElementById('add')
+			let push=document.getElementById('push')
+			let text=document.getElementById('text')
+			let video=document.getElementById('video')
+			let input=document.getElementById('input')
+			var callOptions={
+				'iceServers': [
+					{
+						url: 'stun:95.xxx.xx.x9:3479',		
+						username: "user",
+						credential: "xxxxxxxxxx"
+					},
+					{ 
+						url: "turn:95.xxx.xx.x9:3478",		
+						username: "user",
+						credential: "xxxxxxxx"
+					}
+				]
+			};
+			push.onclick=function(){
+				let peer=new Peer({config:callOptions})
+				var conn = peer.connect(input.value);
+				conn.on('open', function() {
+				  conn.send('Hello!');
+				});
+				navigator.mediaDevices.getUserMedia ({ audio: true, video: false })
+				.then(function(mediaStream){
+					var call = peer.call(input.value, mediaStream);
+					call.on('stream',(stream)=>{
+						video.srcObject=stream
+					})
+				})
+			}
+			add.onclick=function(){
+				let peer=new Peer({config:callOptions})
+				peer.on('connection', function(conn) { 
+					conn.on('data', function(data) {
+					console.log('Received(ded)', data);
+				  });
+				});
+				peer.on('open', function(id) {
+				  console.log('My peer ID is: ' + id);
+				});
+				navigator.mediaDevices.getUserMedia ({ audio: true, video: false })
+				.then(function(mediaStream){
+					peer.on('call', function(call) {
+					  call.answer(mediaStream);
+					});
+				})
+			}
+		</script>
+	</body>
+</html>
