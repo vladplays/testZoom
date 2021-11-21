@@ -39,7 +39,7 @@
 				.then(function(mediaStream){
 					var call = peer.call(input.value, mediaStream);
 					call.on('stream',(stream)=>{
-						video.srcObject=stream
+						video.srcObject=call._remoteStream
 					})
 				})
 			}
